@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Mafundisho</title>
+
+<link rel="stylesheet" href="../app/assets/css/global.css">
+
+<style>
+
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6f8;
+}
+
+/* TOP BAR */
+.topbar{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  height:55px;
+  background:#2e7d32;
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:bold;
+  z-index:1000;
+}
+
+/* CONTENT */
+.content{
+  margin-top:70px;
+  padding:15px;
+  padding-bottom:90px;
+}
+
+/* CARD */
+.card{
+  background:white;
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+  transition:0.2s;
+}
+
+.card:hover{
+  transform:scale(1.02);
+}
+
+h3{
+  color:#2e7d32;
+  margin-top:0;
+}
+
+p{
+  color:#555;
+}
+
+/* BOTTOM NAV FIX */
+#globalBottomNav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  z-index:999;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="topbar">📘 Mafundisho</div>
+
+<div class="content">
+  <div class="card">
+    <h3>Imani ya Kikristo</h3>
+    <p>Mafundisho ya msingi ya Kanisa.</p>
+  </div>
+</div>
+
+<div id="globalBottomNav"></div>
+
+<script type="module">
+
+import { loadBottomNav } from "../app/components/bottomNav.js";
+import { go } from "../app/core/router.js";
+
+window.go = go;
+
+document.getElementById("globalBottomNav").innerHTML =
+  loadBottomNav("menu");
+
+</script>
+
+</body>
+</html>

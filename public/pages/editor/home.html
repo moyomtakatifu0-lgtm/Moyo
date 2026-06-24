@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editor Panel</title>
+
+<link rel="stylesheet" href="/app/assets/css/global.css">
+
+<style>
+.card{
+  background:#fff;
+  padding:12px;
+  margin:10px;
+  border-radius:10px;
+}
+button{
+  margin-top:6px;
+  padding:8px;
+  width:100%;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">🧑‍💻 Editor Panel</div>
+
+<div id="posts">Loading...</div>
+
+<div id="globalBottomNav"></div>
+
+<script type="module">
+
+import { protectPage } from "../../app/core/roleGuard.js";
+import { db } from "../../app/core/firebase.js";
+
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  updateDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+await protectPage(["editor"]);
+
+async function loadPosts(){
+
+  const q = query(
+    collection(db,"posts"),
+    where("status","==","review")
+  );
+
+  const snap = await getDocs(q);
+
+  let html = "";
+
+  snap.forEach(d=>{
+    const p = d.data();
+
+    html += `
+      <div class="card">
+        <h3>${p.title}</h3>
+        <button onclick="back('${d.id}')">Send Back</button>
+        <button onclick="toAdmin('${d.id}')">To Admin</button>
+      </div>
+    `;
+  });
+
+  document.getElementById("posts").innerHTML = html;
+}
+
+window.back = async function(id){
+  await updateDoc(doc(db,"posts",id),{ status:"revision" });
+  loadPosts();
+};
+
+window.toAdmin = async function(id){
+  await updateDoc(doc(db,"posts",id),{ status:"pending_approval" });
+  loadPosts();
+};
+
+loadPosts();
+
+</script>
+
+</body>
+</html>

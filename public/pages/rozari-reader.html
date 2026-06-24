@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rosary Reader</title>
+
+<link rel="stylesheet" href="../app/assets/css/global.css">
+
+<style>
+
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6f8;
+  padding-bottom:80px;
+}
+
+.topbar{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  height:55px;
+  background:#2e7d32;
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:bold;
+}
+
+.content{
+  margin-top:70px;
+  padding:15px;
+}
+
+.card{
+  background:white;
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:12px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.05);
+}
+
+h3{
+  color:#2e7d32;
+}
+
+button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border:none;
+  border-radius:6px;
+  background:#2e7d32;
+  color:white;
+  font-weight:bold;
+}
+
+#status{
+  margin-top:10px;
+  font-size:14px;
+  color:#555;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="topbar">
+  📿 Rosary Reader
+</div>
+
+<div class="content">
+
+  <div class="card">
+    <h3 id="title">Inapakia...</h3>
+    <p id="desc">Tafadhali subiri...</p>
+
+    <div id="status"></div>
+  </div>
+
+  <button id="nextBtn">Next Step</button>
+
+</div>
+
+<div id="globalBottomNav"></div>
+
+<script type="module">
+
+import { go as routerGo } from "../app/core/router.js";
+import { loadBottomNav } from "../app/components/bottomNav.js";
+
+window.go = routerGo;
+
+document.getElementById("globalBottomNav")
+.innerHTML = loadBottomNav("menu");
+
+const params = new URLSearchParams(location.search);
+const type = params.get("type");
+
+const data = {
+  holy: {
+    title: "Rozari Takatifu",
+    desc: "Hii ni Rozari ya kawaida ya Bikira Maria."
+  },
+  mercy: {
+    title: "Rozari ya Huruma ya Mungu",
+    desc: "Tunaomba huruma ya Mungu kwa dunia."
+  },
+  sacred: {
+    title: "Rozari ya Moyo Mtakatifu",
+    desc: "Tunatukuza Moyo Mtakatifu wa Yesu."
+  }
+};
+
+const item = data[type];
+
+document.getElementById("title").innerText =
+  item?.title || "Rosary";
+
+document.getElementById("desc").innerText =
+  item?.desc || "Haijapatikana.";
+
+document.getElementById("nextBtn").addEventListener("click", () => {
+  document.getElementById("status").innerText =
+    "Step engine bado haijaunganishwa kwenye v2 (coming soon) 🙏";
+});
+
+</script>
+
+</body>
+</html>

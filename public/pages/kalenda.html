@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalenda</title>
+
+<link rel="stylesheet" href="../assets/css/global.css">
+
+<style>
+
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6f8;
+}
+
+.topbar{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  height:55px;
+  background:#2e7d32;
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:bold;
+  z-index:1000;
+}
+
+.content{
+  margin-top:65px;
+  padding:10px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:5px;
+}
+
+.day{
+  background:white;
+  padding:10px;
+  text-align:center;
+  border-radius:8px;
+  font-size:12px;
+}
+
+.today{
+  border:2px solid #2e7d32;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="topbar" id="topbar">Kalenda</div>
+
+<div class="content">
+  <div class="grid" id="calendar"></div>
+</div>
+
+<div id="globalBottomNav"></div>
+
+<script type="module">
+
+import { go } from "../app/core/router.js";
+import { loadBottomNav } from "../app/components/bottomNav.js";
+import { calendarEvents } from "../app/data/calendarEvents.js";
+import { getLiturgicalSeason } from "../app/utils/liturgicalCalendar.js";
+
+window.go = go;
+
+const date = new Date();
+const month = date.getMonth();
+const year = date.getFullYear();
+
+const season = getLiturgicalSeason(month + 1);
+document.getElementById("topbar").innerText = "📅 " + season;
+
+const calendar = document.getElementById("calendar");
+const days = new Date(year, month + 1, 0).getDate();
+
+let html = "";
+
+for(let i = 1; i <= days; i++){
+
+  const hasEvent = calendarEvents.some(e =>
+    e.day === i && e.month === (month + 1)
+  );
+
+  html += `
+    <div class="day ${i === date.getDate() ? 'today' : ''}">
+      ${i} ${hasEvent ? '📌' : ''}
+    </div>
+  `;
+}
+
+calendar.innerHTML = html;
+
+document.getElementById("globalBottomNav").innerHTML =
+  loadBottomNav("calendar");
+
+</script>
+
+</body>
+</html>

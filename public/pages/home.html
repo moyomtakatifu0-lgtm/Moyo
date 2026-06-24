@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Home - Moyo App</title>
+
+<link rel="stylesheet" href="../app/assets/css/global.css">
+
+<style>
+
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6f8;
+}
+
+/* TOP BAR */
+.topbar{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  height:55px;
+  background:#2e7d32;
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:bold;
+  z-index:1000;
+}
+
+/* CONTENT */
+.content{
+  margin-top:70px;
+  padding:15px;
+  padding-bottom:90px;
+}
+
+/* CARD */
+.card{
+  background:white;
+  padding:18px;
+  border-radius:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+  margin-bottom:12px;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.card:active{
+  transform:scale(0.98);
+}
+
+.title{
+  font-weight:bold;
+  color:#2e7d32;
+}
+
+.desc{
+  font-size:14px;
+  color:#555;
+  margin-top:6px;
+}
+
+/* BOTTOM NAV SAFE */
+#globalBottomNav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  z-index:999;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="topbar">
+  🏠 Home - Moyo App
+</div>
+
+<div class="content">
+
+  <div class="card" onclick="go('feed.html')">
+    <div class="title">📰 Feed</div>
+    <div class="desc">Posts na mafundisho</div>
+  </div>
+
+  <div class="card" onclick="go('historia.html')">
+    <div class="title">📖 Historia</div>
+    <div class="desc">Historia ya Moyo Mtakatifu</div>
+  </div>
+
+  <div class="card" onclick="go('kalenda.html')">
+    <div class="title">📅 Kalenda</div>
+    <div class="desc">Matukio ya kanisa</div>
+  </div>
+
+  <div class="card" onclick="go('ekaristi.html')">
+    <div class="title">🍞 Ekaristi</div>
+    <div class="desc">Maana na mafundisho</div>
+  </div>
+
+</div>
+
+<div id="globalBottomNav"></div>
+
+<script type="module">
+
+import { go } from "../app/core/router.js";
+import { loadBottomNav } from "../app/components/bottomNav.js";
+import { protectPage } from "../app/core/accessEngine.js";
+
+window.go = go;
+
+await protectPage(["admin","editor","writer","user"]);
+
+document.getElementById("globalBottomNav").innerHTML =
+  loadBottomNav("home");
+
+</script>
+
+</body>
+</html>

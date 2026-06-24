@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Book Library</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6f8;
+}
+
+.header{
+  background:#2e7d32;
+  color:white;
+  padding:15px;
+  text-align:center;
+  font-weight:bold;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  padding:15px;
+}
+
+.card{
+  background:white;
+  padding:18px;
+  border-radius:12px;
+  text-align:center;
+  font-weight:bold;
+  color:#2e7d32;
+  cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+
+.card:active{
+  transform:scale(0.97);
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">📖 Biblia Takatifu</div>
+
+<div class="grid">
+
+  <div class="card" onclick="openBook('mwanzo')">Mwanzo</div>
+  <div class="card" onclick="openBook('kutoka')">Kutoka</div>
+  <div class="card" onclick="openBook('walawi')">Walawi</div>
+  <div class="card" onclick="openBook('zaburi')">Zaburi</div>
+  <div class="card" onclick="openBook('mathayo')">Mathayo</div>
+
+</div>
+
+<script>
+function openBook(book){
+  location.href =
+  `chapter-list.html?book=${book}`;
+}
+</script>
+
+</body>
+</html>

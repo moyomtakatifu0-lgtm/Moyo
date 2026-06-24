@@ -1,0 +1,201 @@
+/* =========================
+PROJECT: MoyoApp
+MODULE: Admin Notification Analytics Dashboard
+FIREBASE v9
+========================= */
+
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notification Analytics</title>
+
+<link rel="stylesheet" href="/app/assets/css/global.css">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6f8;
+}
+
+.topbar{
+  background:#1b5e20;
+  color:#fff;
+  padding:15px;
+  text-align:center;
+  font-weight:bold;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  padding:15px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+
+.card{
+  background:#fff;
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.06);
+}
+
+.title{
+  font-size:13px;
+  color:#777;
+}
+
+.value{
+  font-size:22px;
+  font-weight:bold;
+  margin-top:5px;
+}
+
+.table{
+  margin-top:15px;
+  background:#fff;
+  border-radius:12px;
+  overflow:hidden;
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  padding:10px;
+  border-bottom:1px solid #eee;
+  font-size:13px;
+}
+
+.badge{
+  padding:3px 8px;
+  border-radius:8px;
+  font-size:11px;
+  color:#fff;
+}
+
+.sent{background:#2e7d32;}
+.failed{background:#c62828;}
+.clicked{background:#1565c0;}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">📊 Notification Analytics Dashboard</div>
+
+<div class="container">
+
+  <!-- STATS -->
+  <div class="grid">
+
+    <div class="card">
+      <div class="title">Total Notifications</div>
+      <div class="value" id="total">0</div>
+    </div>
+
+    <div class="card">
+      <div class="title">Sent</div>
+      <div class="value" id="sent">0</div>
+    </div>
+
+    <div class="card">
+      <div class="title">Clicked</div>
+      <div class="value" id="clicked">0</div>
+    </div>
+
+  </div>
+
+  <!-- LOGS -->
+  <div class="table" id="logTable"></div>
+
+</div>
+
+<script type="module">
+
+import { protectPage } from "../../app/core/authGuard.js";
+import { db } from "../../app/core/firebase.js";
+
+import {
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  limit
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+/* ACCESS */
+await protectPage(["admin"]);
+
+/* =========================
+LOAD ANALYTICS
+========================= */
+async function loadAnalytics(){
+
+  const snap = await getDocs(collection(db,"notification_logs"));
+
+  let total = 0;
+  let sent = 0;
+  let clicked = 0;
+
+  const logs = [];
+
+  snap.forEach(d => {
+
+    const data = d.data();
+    logs.push(data);
+
+    total++;
+
+    if(data.status === "sent") sent++;
+    if(data.status === "clicked") clicked++;
+  });
+
+  document.getElementById("total").innerText = total;
+  document.getElementById("sent").innerText = sent;
+  document.getElementById("clicked").innerText = clicked;
+
+  renderLogs(logs);
+}
+
+/* =========================
+RENDER LOGS
+========================= */
+function renderLogs(logs){
+
+  const table = document.getElementById("logTable");
+  table.innerHTML = "";
+
+  logs.slice(0,20).forEach(l => {
+
+    table.innerHTML += `
+      <div class="row">
+
+        <div>
+          <b>${l.title || "Notification"}</b><br>
+          <small>${l.message || ""}</small>
+        </div>
+
+        <div>
+          <span class="badge ${l.status}">
+            ${l.status || "unknown"}
+          </span>
+        </div>
+
+      </div>
+    `;
+  });
+}
+
+loadAnalytics();
+
+</script>
+
+</body>
+</html>

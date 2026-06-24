@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Moyo App - Novena</title>
+
+<link rel="stylesheet" href="../app/assets/css/global.css">
+
+<style>
+
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6f8;
+  padding-bottom:80px;
+}
+
+.topbar{
+  position:sticky;
+  top:0;
+  background:#2e7d32;
+  color:white;
+  padding:15px;
+  text-align:center;
+  font-weight:bold;
+}
+
+.container{
+  padding:15px;
+}
+
+.card{
+  background:white;
+  padding:18px;
+  border-radius:12px;
+  margin-bottom:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+  cursor:pointer;
+  color:#2e7d32;
+  font-weight:bold;
+  transition:0.2s;
+}
+
+.card:hover{
+  transform:scale(1.02);
+}
+
+.desc{
+  font-size:13px;
+  color:#666;
+  margin-top:5px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="topbar">
+  🙏 Novena
+</div>
+
+<div class="container">
+
+  <div class="card" onclick="openNovena('holy-spirit')">
+    Roho Mtakatifu Novena
+    <div class="desc">Novena ya kumwomba Roho Mtakatifu</div>
+  </div>
+
+  <div class="card" onclick="openNovena('divine-mercy')">
+    Divine Mercy Novena
+    <div class="desc">Novena ya Huruma ya Mungu</div>
+  </div>
+
+  <div class="card" onclick="openNovena('sacred-heart')">
+    Moyo Mtakatifu Novena
+    <div class="desc">Novena ya Moyo Mtakatifu wa Yesu</div>
+  </div>
+
+</div>
+
+<div id="globalBottomNav"></div>
+
+<script type="module">
+
+import { loadBottomNav } from "../app/components/bottomNav.js";
+import { go as routerGo } from "../app/core/router.js";
+
+window.go = routerGo;
+
+window.openNovena = (id)=>{
+  routerGo("novena-reader.html?id=" + id);
+};
+
+document.getElementById("globalBottomNav")
+.innerHTML = loadBottomNav("menu");
+
+</script>
+
+</body>
+</html>

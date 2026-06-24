@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Signup</title>
+
+<link rel="stylesheet" href="../app/assets/css/global.css">
+</head>
+
+<body>
+
+<h2>Signup</h2>
+
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+
+<button id="signupBtn">Create Account</button>
+
+<script type="module">
+
+import { auth, db } from "../app/core/firebase.js";
+import { go } from "../app/core/router.js";
+import { getUserRole } from "../app/core/roleGuard.js";
+
+import {
+  createUserWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+import {
+  doc,
+  setDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+window.go = go;
+
+/* ROUTE MAP (SINGLE SOURCE OF TRUTH) */
+const routes = {
+  admin: "admin/home.html",
+  editor: "editor/home.html",
+  writer: "writer/home.html",
+  user: "user/home.html"
+};
+
+/* SAFE SIGNUP ENGINE */
+document.getElementById("signupBtn").addEventListener("click", async () => {
+
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  if (!email || !password) {
+    alert("Jaza email na password");
+    return;
+  }
+
+  try {
+
+    const userCred = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCred.user;
+
+    await setDoc(doc(db, "users", user.uid), {
+      email,
+      role: "user",
+      profileCompleted: false,
+      createdAt: serverTimestamp(),
+      lastLogin: serverTimestamp()
+    });
+
+    const role = await getUserRole(user.uid);
+
+    go(routes[role] || routes.user);
+
+  } catch (err) {
+    alert(err.message);
+  }
+
+});
+
+</script>
+
+</body>
+</html>

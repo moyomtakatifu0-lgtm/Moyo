@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Moyo App - Stations</title>
+
+<link rel="stylesheet" href="../app/assets/css/global.css">
+
+<style>
+
+/* ==========================================================
+PROJECT : MOYO APP
+MODULE  : STATIONS OF THE CROSS
+FIREBASE: v9
+PURPOSE : Njia ya Msalaba
+========================================================== */
+
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6f8;
+  padding-bottom:80px;
+}
+
+/* TOP BAR */
+.topbar{
+  position:sticky;
+  top:0;
+  background:#2e7d32;
+  color:white;
+  padding:15px;
+  text-align:center;
+  font-weight:bold;
+  z-index:100;
+}
+
+/* CONTENT */
+.container{
+  padding:15px;
+}
+
+/* CARD */
+.card{
+  background:white;
+  padding:18px;
+  border-radius:12px;
+  margin-bottom:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+  color:#2e7d32;
+  font-weight:bold;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.card small{
+  display:block;
+  color:#666;
+  margin-top:6px;
+  font-weight:normal;
+}
+
+.card:hover{
+  transform:scale(1.02);
+}
+
+/* NAV FIX */
+#globalBottomNav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  z-index:999;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  ✝ Njia ya Msalaba
+</div>
+
+<!-- CONTENT -->
+<div class="container">
+
+  <div class="card">
+    Kituo cha 1
+    <small>Yesu anahukumiwa kifo</small>
+  </div>
+
+  <div class="card">
+    Kituo cha 2
+    <small>Yesu anabeba msalaba</small>
+  </div>
+
+  <div class="card">
+    Kituo cha 3
+    <small>Yesu anaanguka mara ya kwanza</small>
+  </div>
+
+  <div class="card">
+    Kituo cha 4
+    <small>Yesu anakutana na Mama yake</small>
+  </div>
+
+  <div class="card">
+    Kituo cha 5
+    <small>Simoni wa Kirene anamsaidia Yesu</small>
+  </div>
+
+  <div class="card">
+    Kituo cha 6
+    <small>Veronika anamfuta Yesu uso</small>
+  </div>
+
+  <div class="card">
+    Kituo cha 7
+    <small>Yesu anaanguka mara ya pili</small>
+  </div>
+
+  <div class="card">
+    Kituo cha 8
+    <small>Yesu anawafariji wanawake wa Yerusalemu</small>
+  </div>
+
+  <div class="card">
+    Kituo cha 9
+    <small>Yesu anaanguka mara ya tatu</small>
+  </div>
+
+  <div class="card">
+    Kituo cha 10
+    <small>Yesu anavuliwa mavazi yake</small>
+  </div>
+
+  <div class="card">
+    Kituo cha 11
+    <small>Yesu anasulubiwa msalabani</small>
+  </div>
+
+  <div class="card">
+    Kituo cha 12
+    <small>Yesu anakufa msalabani</small>
+  </div>
+
+  <div class="card">
+    Kituo cha 13
+    <small>Yesu anashushwa msalabani</small>
+  </div>
+
+  <div class="card">
+    Kituo cha 14
+    <small>Yesu anazikwa kaburini</small>
+  </div>
+
+</div>
+
+<!-- ROUTER ONLY (STRICT) -->
+<div id="globalBottomNav"></div>
+
+<script type="module">
+
+import { go as routerGo } from "../app/core/router.js";
+import { loadBottomNav } from "../app/components/bottomNav.js";
+
+window.go = routerGo;
+
+document.getElementById("globalBottomNav")
+.innerHTML = loadBottomNav("menu");
+
+</script>
+
+</body>
+</html>

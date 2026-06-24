@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Moyo App - Menu Hub</title>
+
+<link rel="stylesheet" href="../app/assets/css/global.css">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#f4f6f8;
+  overflow:hidden;
+}
+
+/* TOP BAR */
+.topbar{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  height:55px;
+  background:#2e7d32;
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:bold;
+  z-index:1000;
+}
+
+/* CONTENT */
+.content{
+  position:absolute;
+  top:55px;
+  bottom:90px;
+  left:0;
+  right:0;
+  overflow-y:auto;
+}
+
+/* TITLE */
+.title{
+  text-align:center;
+  padding:15px;
+  color:#444;
+  font-size:14px;
+}
+
+/* GRID */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2, 1fr);
+  gap:12px;
+  padding:15px;
+}
+
+/* CARD */
+.card{
+  background:white;
+  padding:18px;
+  border-radius:12px;
+  text-align:center;
+  font-weight:bold;
+  color:#2e7d32;
+  cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+  transition:.2s;
+  user-select:none;
+}
+
+.card:hover{
+  transform:scale(1.03);
+}
+
+.card span{
+  display:block;
+  font-size:22px;
+  margin-bottom:6px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">☰ Menu Hub</div>
+
+<div class="content">
+
+  <div class="title">Chagua kipengele cha kusoma au huduma</div>
+
+  <div class="grid">
+
+    <div class="card" onclick="goTo('bible')"><span>📖</span>Biblia</div>
+    <div class="card" onclick="goTo('constitution')"><span>📜</span>Katiba</div>
+    <div class="card" onclick="goTo('rules')"><span>📘</span>Kanuni</div>
+    <div class="card" onclick="goTo('rosary')"><span>✝️</span>Rozari</div>
+    <div class="card" onclick="goTo('novena')"><span>🙏</span>Novena</div>
+    <div class="card" onclick="goTo('msalaba')"><span>✝️</span>Njia ya Msalaba</div>
+    <div class="card" onclick="goTo('calendar')"><span>📅</span>Kalenda</div>
+    <div class="card" onclick="goTo('eucharist')"><span>🍞</span>Ekaristi</div>
+    <div class="card" onclick="goTo('question')"><span>❓</span>Maswali ya Imani</div>
+    <div class="card" onclick="goTo('nyimbo')"><span>🎶</span>Nyimbo</div>
+    <div class="card" onclick="goTo('majitoleo')"><span>🕊️</span>Majitoleo</div>
+    <div class="card" onclick="goTo('matangazo')"><span>📢</span>Matangazo</div>
+    <div class="card" onclick="goTo('mafundisho')"><span>📚</span>Mafundisho</div>
+    <div class="card" onclick="goTo('historia')"><span>🏛️</span>Historia ya Moyo Mtakatifu</div>
+
+  </div>
+
+</div>
+
+<div id="globalBottomNav"></div>
+
+<script type="module">
+
+import { go } from "../app/core/router.js";
+import { loadBottomNav } from "../app/components/bottomNav.js";
+
+window.go = go;
+
+/* ROUTE MAP */
+const ROUTES = {
+  bible: "book-reader.html?type=bible",
+  constitution: "book-reader.html?type=constitution",
+  rules: "book-reader.html?type=rules",
+
+  rosary: "rosary-reader.html",
+  novena: "novena-reader.html",
+  msalaba: "msalaba.html",
+
+  calendar: "calendar.html",
+  eucharist: "eucharist.html",
+  question: "question.html",
+  nyimbo: "nyimbo.html",
+
+  majitoleo: "majitoleo.html",
+  matangazo: "matangazo.html",
+  mafundisho: "mafundisho.html",
+  historia: "historia.html"
+};
+
+window.goTo = (key) => {
+  const path = ROUTES[key];
+  if (!path) return console.error("Route not found:", key);
+  go(path);
+};
+
+document.getElementById("globalBottomNav").innerHTML =
+  loadBottomNav("menu");
+
+</script>
+
+</body>
+</html>

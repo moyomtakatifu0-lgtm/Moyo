@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Moyo App - Faith Questions</title>
+
+<link rel="stylesheet" href="../app/assets/css/global.css">
+
+<style>
+
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6f8;
+  padding-bottom:80px;
+}
+
+.topbar{
+  position:sticky;
+  top:0;
+  background:#2e7d32;
+  color:white;
+  padding:15px;
+  text-align:center;
+  font-weight:bold;
+}
+
+.container{
+  padding:15px;
+}
+
+.card{
+  background:white;
+  padding:18px;
+  border-radius:12px;
+  margin-bottom:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+  transition:0.2s;
+}
+
+.card:hover{
+  transform:scale(1.02);
+}
+
+.q{
+  font-weight:bold;
+  color:#2e7d32;
+}
+
+.a{
+  margin-top:6px;
+  color:#555;
+}
+
+#globalBottomNav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  z-index:999;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="topbar">❓ Maswali ya Imani</div>
+
+<div class="container">
+
+  <div class="card">
+    <div class="q">Kwa nini tunaomba?</div>
+    <div class="a">Tunaomba ili kuwasiliana na Mungu na kupata neema.</div>
+  </div>
+
+  <div class="card">
+    <div class="q">Kwa nini tunasoma Biblia?</div>
+    <div class="a">Biblia ni Neno la Mungu linalotuongoza maisha yetu.</div>
+  </div>
+
+  <div class="card">
+    <div class="q">Ekaristi ni nini?</div>
+    <div class="a">Ni Mwili na Damu ya Kristo katika umbo la mkate na divai.</div>
+  </div>
+
+</div>
+
+<div id="globalBottomNav"></div>
+
+<script type="module">
+
+import { loadBottomNav } from "../app/components/bottomNav.js";
+import { go as routerGo } from "../app/core/router.js";
+
+window.go = routerGo;
+
+const nav = document.getElementById("globalBottomNav");
+
+try {
+  nav.innerHTML = loadBottomNav("menu");
+} catch (e) {
+  console.warn("BottomNav error:", e);
+  nav.innerHTML = "";
+}
+
+</script>
+
+</body>
+</html>

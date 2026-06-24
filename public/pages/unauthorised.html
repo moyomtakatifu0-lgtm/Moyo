@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Access Denied</title>
+
+  <style>
+    body{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:100vh;
+      font-family:Arial;
+      background:#f4f6f8;
+      margin:0;
+    }
+
+    .box{
+      text-align:center;
+      background:#fff;
+      padding:24px;
+      border-radius:12px;
+      box-shadow:0 2px 10px rgba(0,0,0,0.08);
+      width:90%;
+      max-width:360px;
+    }
+
+    h2{
+      color:#b71c1c;
+      margin-bottom:10px;
+    }
+
+    button{
+      margin-top:15px;
+      padding:10px;
+      width:100%;
+      border:none;
+      background:#2e7d32;
+      color:#fff;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:bold;
+    }
+
+    button:hover{
+      opacity:0.9;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>🚫 Access Denied</h2>
+  <p>Huna ruhusa ya kufungua sehemu hii.</p>
+
+  <button id="homeBtn">🏠 Rudi Nyumbani</button>
+</div>
+
+<script type="module">
+
+import { auth } from "../app/core/firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+import { getUserRole } from "../app/core/roleGuard.js";
+import { go } from "../app/core/router.js";
+
+window.go = go;
+
+/* CENTRAL ROLE MAP */
+const routes = {
+  admin: "admin/home.html",
+  editor: "editor/home.html",
+  writer: "writer/home.html",
+  user: "user/home.html"
+};
+
+/* ONE-TIME RESOLVER (NO MULTIPLE LISTENERS) */
+async function resolveHome(user){
+
+  if (!user) return "login.html";
+
+  try {
+    const role = await getUserRole(user.uid);
+    return routes[role] || routes.user;
+  } catch (e) {
+    console.error(e);
+    return routes.user;
+  }
+}
+
+/* INIT ONCE */
+let cachedUser = null;
+
+onAuthStateChanged(auth, (user) => {
+  cachedUser = user;
+});
+
+/* BUTTON ACTION */
+document.getElementById("homeBtn").addEventListener("click", async () => {
+  const target = await resolveHome(cachedUser);
+  go(target);
+});
+
+</script>
+
+</body>
+</html>

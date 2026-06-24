@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Devotion Reader</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#f4f6f8;
+  color:#222;
+}
+
+/* HERO IMAGE */
+.hero{
+  position:relative;
+  width:100%;
+  height:220px;
+  overflow:hidden;
+}
+
+.hero img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.hero-overlay{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  padding:12px;
+  background:linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+  color:white;
+}
+
+.hero-title{
+  font-size:18px;
+  font-weight:bold;
+}
+
+/* CONTENT */
+.container{
+  padding:16px;
+  max-width:600px;
+  margin:auto;
+}
+
+.card{
+  background:white;
+  padding:14px;
+  border-radius:12px;
+  margin-bottom:12px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.05);
+}
+
+.section-title{
+  font-size:13px;
+  font-weight:bold;
+  color:#2e7d32;
+  margin-bottom:6px;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+}
+
+.verse{
+  font-style:italic;
+  color:#444;
+  line-height:1.5;
+}
+
+.text{
+  line-height:1.6;
+  font-size:14px;
+}
+
+/* PRAYER BOX */
+.prayer{
+  background:#e8f5e9;
+  border-left:4px solid #2e7d32;
+}
+
+/* BOTTOM NAV SPACE */
+.spacer{
+  height:80px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <img id="image" src="https://via.placeholder.com/600x400" alt="">
+  <div class="hero-overlay">
+    <div class="hero-title" id="title">Devotion Title</div>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="container">
+
+  <!-- BIBLE -->
+  <div class="card">
+    <div class="section-title">📖 Nukuu ya Biblia</div>
+    <div class="verse" id="bible">
+      Zaburi 23:1 — Bwana ndiye mchungaji wangu...
+    </div>
+  </div>
+
+  <!-- REFLECTION -->
+  <div class="card">
+    <div class="section-title">🧠 Tafakari</div>
+    <div class="text" id="reflection">
+      Tafakari itaonekana hapa...
+    </div>
+  </div>
+
+  <!-- PRAYER -->
+  <div class="card prayer">
+    <div class="section-title">🙏 Sala</div>
+    <div class="text" id="prayer">
+      Sala itaonekana hapa...
+    </div>
+  </div>
+
+</div>
+
+<div class="spacer"></div>
+
+<script type="module">
+
+import { db } from "../../app/core/firebase.js";
+import { doc, getDoc } 
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+
+/* LOAD DEVOTION */
+async function loadDevotion(){
+
+  if(!id) return;
+
+  const snap = await getDoc(doc(db, "posts", id));
+
+  if(!snap.exists()) return;
+
+  const data = snap.data();
+
+  document.getElementById("title").innerText = data.title || "";
+  document.getElementById("image").src = data.image?.url || "";
+
+  document.getElementById("bible").innerText =
+    `${data.bibleVerse?.reference || ""} — ${data.bibleVerse?.text || ""}`;
+
+  document.getElementById("reflection").innerText =
+    data.reflection || "";
+
+  document.getElementById("prayer").innerText =
+    data.prayer || "";
+}
+
+loadDevotion();
+
+</script>
+
+</body>
+</html>

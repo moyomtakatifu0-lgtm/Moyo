@@ -1,0 +1,202 @@
+<!-- =========================
+PROJECT: MoyoApp
+MODULE: Login Page (FIXED SYSTEM)
+========================= -->
+
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#f4f6f8;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.card{
+  width:90%;
+  max-width:360px;
+  background:#fff;
+  padding:24px;
+  border-radius:14px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.08);
+}
+
+h3{ text-align:center; color:#2e7d32; }
+
+input{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:1px solid #ddd;
+  border-radius:8px;
+}
+
+button{
+  width:100%;
+  margin-top:14px;
+  padding:12px;
+  background:#2e7d32;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+}
+
+#msg{
+  text-align:center;
+  margin-top:10px;
+  min-height:18px;
+  font-size:13px;
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  margin-top:14px;
+  font-size:13px;
+}
+
+.row a{
+  color:#2e7d32;
+  text-decoration:none;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+  <h3>🔐 Login</h3>
+
+  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+
+  <button id="loginBtn">Login</button>
+
+  <p id="msg"></p>
+
+  <div class="row">
+    <a id="reset">🔑 Reset Password</a>
+    <a onclick="go('register.html')">👤 Register</a>
+  </div>
+
+</div>
+
+<script type="module">
+
+/* ✅ FIXED PATHS */
+import { auth, db } from "../core/firebase.js";
+import { go } from "../core/router.js";
+
+/* Firebase v9 */
+import {
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+import {
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+/* REMOVE BROKEN IMPORT */
+/* import { saveFcmToken } ... ❌ temporarily disabled */
+
+window.go = go;
+
+/* UI */
+const email = document.getElementById("email");
+const password = document.getElementById("password");
+const msg = document.getElementById("msg");
+const btn = document.getElementById("loginBtn");
+
+function setLoading(state){
+  btn.disabled = state;
+  btn.innerText = state ? "Loading..." : "Login";
+}
+
+/* ROLE */
+async function getUserRole(uid){
+  try {
+    const snap = await getDoc(doc(db,"users",uid));
+    if(!snap.exists()) return "user";
+    return snap.data().role || "user";
+  } catch {
+    return "user";
+  }
+}
+
+/* REDIRECT */
+async function smartRedirect(user){
+  const role = await getUserRole(user.uid);
+
+  if(role === "admin") go("admin/home.html");
+  else if(role === "editor") go("editor/home.html");
+  else if(role === "writer") go("writer/home.html");
+  else go("devotion/home.html");
+}
+
+/* LOGIN */
+btn.addEventListener("click", async () => {
+
+  console.log("LOGIN CLICKED");
+
+  if(!email.value || !password.value){
+    msg.innerText = "⚠️ Jaza email na password";
+    return;
+  }
+
+  setLoading(true);
+  msg.innerText = "";
+
+  try {
+
+    const cred = await signInWithEmailAndPassword(
+      auth,
+      email.value.trim(),
+      password.value.trim()
+    );
+
+    msg.innerText = "✔ Login successful";
+
+    await smartRedirect(cred.user);
+
+  } catch (e) {
+    msg.innerText = "❌ " + e.message;
+    console.log(e);
+  }
+
+  setLoading(false);
+});
+
+/* RESET */
+document.getElementById("reset").addEventListener("click", async () => {
+
+  if(!email.value){
+    msg.innerText = "⚠️ Weka email kwanza";
+    return;
+  }
+
+  try {
+    await sendPasswordResetEmail(auth, email.value);
+    msg.innerText = "✔ Reset email sent";
+  } catch (e) {
+    msg.innerText = "❌ " + e.message;
+  }
+
+});
+
+</script>
+
+</body>
+</html>

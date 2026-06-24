@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Edit Post - Moyo App</title>
+
+<link rel="stylesheet" href="../app/assets/css/global.css">
+
+<style>
+
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6f8;
+}
+
+.container{
+  max-width:600px;
+  margin:40px auto;
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 2px 10px rgba(0,0,0,.08);
+}
+
+h2{
+  text-align:center;
+  color:#2e7d32;
+}
+
+input, textarea{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border:1px solid #ddd;
+  border-radius:8px;
+  font-size:14px;
+  outline:none;
+}
+
+textarea{
+  min-height:120px;
+  resize:none;
+}
+
+button{
+  width:100%;
+  margin-top:15px;
+  padding:10px;
+  background:#2e7d32;
+  color:white;
+  border:none;
+  border-radius:8px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button:disabled{
+  opacity:0.6;
+}
+
+#msg{
+  text-align:center;
+  margin-top:10px;
+  font-size:14px;
+}
+
+.success{ color:green; }
+.error{ color:red; }
+
+img{
+  width:100%;
+  margin-top:10px;
+  border-radius:10px;
+  display:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h2>Edit Post</h2>
+
+  <input id="title" placeholder="Title">
+  <input id="verse" placeholder="Verse">
+
+  <textarea id="tafakari" placeholder="Tafakari"></textarea>
+  <textarea id="sala" placeholder="Sala"></textarea>
+
+  <input id="imageUrl" placeholder="Image URL (optional)">
+  <img id="preview">
+
+  <button id="updateBtn">Update Post</button>
+
+  <div id="msg"></div>
+
+</div>
+
+<div id="globalBottomNav"></div>
+
+<script type="module">
+
+import { auth, db } from "../../app/core/firebase.js";
+import { protectPage } from "../../app/core/accessEngine.js";
+import { go } from "../../app/core/router.js";
+import { loadBottomNav } from "../../app/components/bottomNav.js";
+
+import {
+  doc,
+  getDoc,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+import {
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+window.go = go;
+
+await protectPage(["admin","editor","writer"]);
+
+document.getElementById("globalBottomNav").innerHTML =
+  loadBottomNav("admin");
+
+const params = new URLSearchParams(location.search);
+const postId = params.get("id");
+
+const title = document.getElementById("title");
+const verse = document.getElementById("verse");
+const tafakari = document.getElementById("tafakari");
+const sala = document.getElementById("sala");
+const imageUrl = document.getElementById("imageUrl");
+const preview = document.getElementById("preview");
+const msg = document.getElementById("msg");
+const btn = document.getElementById("updateBtn");
+
+onAuthStateChanged(auth, async (user)=>{
+  if(!user){
+    go("login.html");
+    return;
+  }
+  await loadPost();
+});
+
+async function loadPost(){
+
+  if(!postId){
+    msg.innerText = "Post ID haijapatikana";
+    msg.className = "error";
+    return;
+  }
+
+  const snap = await getDoc(doc(db,"posts",postId));
+
+  if(!snap.exists()){
+    msg.innerText = "Post haikupatikana";
+    msg.className = "error";
+    return;
+  }
+
+  const data = snap.data();
+
+  title.value = data.title || "";
+  verse.value = data.verse || "";
+  tafakari.value = data.tafakari || "";
+  sala.value = data.sala || "";
+  imageUrl.value = data.imageUrl || "";
+
+  if(data.imageUrl){
+    preview.src = data.imageUrl;
+    preview.style.display = "block";
+  }
+}
+
+imageUrl.addEventListener("input", ()=>{
+
+  if(imageUrl.value.trim()){
+    preview.src = imageUrl.value;
+    preview.style.display = "block";
+  } else {
+    preview.style.display = "none";
+  }
+
+});
+
+btn.addEventListener("click", async ()=>{
+
+  if(!postId){
+    msg.innerText = "Post ID missing";
+    msg.className = "error";
+    return;
+  }
+
+  btn.disabled = true;
+
+  try{
+
+    await updateDoc(doc(db,"posts",postId),{
+      title: title.value,
+      verse: verse.value,
+      tafakari: tafakari.value,
+      sala: sala.value,
+      imageUrl: imageUrl.value,
+      status: "edited"
+    });
+
+    msg.innerText = "Imehifadhiwa ✔";
+    msg.className = "success";
+
+  } catch(err){
+    msg.innerText = err.message;
+    msg.className = "error";
+  }
+
+  btn.disabled = false;
+
+});
+
+</script>
+
+</body>
+</html>

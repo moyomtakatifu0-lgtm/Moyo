@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Register</title>
+<link rel="stylesheet" href="../app/assets/css/global.css">
+</head>
+
+<body>
+
+<div class="container">
+
+  <h2>Register</h2>
+
+  <input id="name" placeholder="Full Name">
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+
+  <button id="registerBtn">Register</button>
+
+  <p id="msg"></p>
+
+</div>
+
+<script type="module">
+
+import { registerUser } from "../app/core/authEngine.js";
+import { getUserRole } from "../app/core/roleGuard.js";
+import { go } from "../app/core/router.js";
+
+window.go = go;
+
+const routes = {
+  admin: "admin/home.html",
+  editor: "editor/home.html",
+  writer: "writer/home.html",
+  user: "devotion/home.html"
+};
+
+const msg = document.getElementById("msg");
+const btn = document.getElementById("registerBtn");
+
+btn.addEventListener("click", async () => {
+
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  msg.innerText = "";
+
+  if (!name || !email || !password) {
+    msg.innerText = "Jaza taarifa zote";
+    return;
+  }
+
+  try {
+
+    btn.disabled = true;
+    btn.innerText = "Creating...";
+
+    const user = await registerUser(email, password, name);
+
+    const role = await getUserRole(user.uid);
+
+    go(routes[role] || routes.user);
+
+  } catch (e) {
+    msg.innerText = e.message;
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "Register";
+  }
+
+});
+
+</script>
+
+</body>
+</html>

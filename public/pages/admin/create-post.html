@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin Create Post</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6f8;
+}
+
+.header{
+  background:#1b5e20;
+  color:white;
+  padding:15px;
+  text-align:center;
+  font-weight:bold;
+}
+
+.container{
+  padding:15px;
+  max-width:600px;
+  margin:auto;
+}
+
+input, textarea, select{
+  width:100%;
+  padding:12px;
+  margin-bottom:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  box-sizing:border-box;
+}
+
+textarea{
+  min-height:120px;
+  resize:none;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.draft{
+  background:#777;
+  color:white;
+  margin-bottom:10px;
+}
+
+.publish{
+  background:#2e7d32;
+  color:white;
+}
+
+img{
+  width:100%;
+  margin-top:10px;
+  border-radius:8px;
+  display:none;
+}
+
+.msg{
+  text-align:center;
+  margin-top:10px;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">👑 Create Post (Admin)</div>
+
+<div class="container">
+
+<input id="title" placeholder="Title">
+<input id="bibleVerse" placeholder="Bible Verse">
+
+<textarea id="tafakari" placeholder="Tafakari"></textarea>
+<textarea id="sala" placeholder="Sala"></textarea>
+
+<select id="type">
+  <option value="devotion">Devotion</option>
+  <option value="announcement">Announcement</option>
+  <option value="teaching">Teaching</option>
+</select>
+
+<input type="file" id="image">
+
+<img id="preview">
+
+<button class="draft" onclick="savePost('draft')">Save Draft</button>
+<button class="publish" onclick="savePost('published')">Publish</button>
+
+<div class="msg" id="msg"></div>
+
+</div>
+
+<script type="module">
+
+/* ================= FIREBASE CORE ================= */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getFirestore, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
+
+/* ================= CONFIG ================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyAwX9qu6XSfARlC1ZlQAtC1ZlQAtT6wKsDGpPP06A",
+  authDomain: "moyo-app-530ef.firebaseapp.com",
+  projectId: "moyo-app-530ef",
+  storageBucket: "moyo-app-530ef.firebasestorage.app",
+  messagingSenderId: "202818396077",
+  appId: "1:202818396077:web:7767ef6a13cbef78c58b24"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+/* ================= AUTH GUARD ================= */
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    alert("Login required");
+    window.location.href = "../login.html";
+  }
+});
+
+/* ================= IMAGE PREVIEW ================= */
+let selectedFile = null;
+
+document.getElementById("image").addEventListener("change", (e)=>{
+  selectedFile = e.target.files[0];
+
+  if(selectedFile){
+    const img = document.getElementById("preview");
+    img.src = URL.createObjectURL(selectedFile);
+    img.style.display = "block";
+  }
+});
+
+/* ================= SAVE POST ================= */
+window.savePost = async function(status){
+
+  const msg = document.getElementById("msg");
+
+  try {
+
+    let imageUrl = "";
+
+    if(selectedFile){
+      const imageRef = ref(storage, "posts/" + Date.now());
+      await uploadBytes(imageRef, selectedFile);
+      imageUrl = await getDownloadURL(imageRef);
+    }
+
+    await addDoc(collection(db, "posts"), {
+      title: document.getElementById("title").value.trim(),
+      bibleVerse: document.getElementById("bibleVerse").value.trim(),
+      tafakari: document.getElementById("tafakari").value.trim(),
+      sala: document.getElementById("sala").value.trim(),
+      type: document.getElementById("type").value,
+
+      imageUrl,
+      status,
+
+      createdBy: auth.currentUser.uid,
+      createdAt: serverTimestamp()
+    });
+
+    msg.innerText = "Post saved successfully ✔";
+    msg.style.color = "green";
+
+    document.getElementById("title").value = "";
+    document.getElementById("bibleVerse").value = "";
+    document.getElementById("tafakari").value = "";
+    document.getElementById("sala").value = "";
+    document.getElementById("image").value = "";
+    document.getElementById("preview").style.display = "none";
+
+    selectedFile = null;
+
+  } catch (err) {
+    console.error(err);
+
+    msg.innerText = "Error saving post ❌";
+    msg.style.color = "red";
+  }
+};
+
+</script>
+
+</body>
+</html>

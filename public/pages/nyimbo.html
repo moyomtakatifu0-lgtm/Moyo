@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Nyimbo Takatifu</title>
+
+<link rel="stylesheet" href="../app/assets/css/global.css">
+
+<style>
+
+.category-title{
+  margin:15px 0 10px;
+  font-weight:bold;
+  color:#2e7d32;
+}
+
+.song{
+  background:#fff;
+  padding:15px;
+  margin-bottom:12px;
+  border-radius:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.05);
+}
+
+.song h3{
+  margin:0 0 8px 0;
+  color:#2e7d32;
+}
+
+audio{
+  width:100%;
+  margin-top:8px;
+}
+
+.content{
+  padding:15px;
+}
+
+.topbar{
+  position:sticky;
+  top:0;
+  background:#2e7d32;
+  color:white;
+  padding:15px;
+  text-align:center;
+  font-weight:bold;
+  z-index:1000;
+}
+
+#globalBottomNav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  z-index:999;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="topbar">
+  🎶 Nyimbo Takatifu
+</div>
+
+<div class="content">
+
+  <div class="category-title">🙏 Nyimbo za Ekaristi Takatifu</div>
+
+  <div class="song">
+    <h3>Adoro Te Devote</h3>
+    <audio controls>
+      <source src="../app/assets/songs/adoro-te.mp3" type="audio/mpeg">
+    </audio>
+  </div>
+
+  <div class="song">
+    <h3>Panis Angelicus</h3>
+    <audio controls>
+      <source src="../app/assets/songs/panis-angelicus.mp3" type="audio/mpeg">
+    </audio>
+  </div>
+
+  <div class="category-title">❤️ Moyo Mtakatifu wa Yesu</div>
+
+  <div class="song">
+    <h3>Moyo Wangu Yesu</h3>
+    <audio controls>
+      <source src="../app/assets/songs/moyo-wangu.mp3" type="audio/mpeg">
+    </audio>
+  </div>
+
+  <div class="song">
+    <h3>Moyo Mtakatifu wa Yesu</h3>
+    <audio controls>
+      <source src="../app/assets/songs/moyo-mtakatifu.mp3" type="audio/mpeg">
+    </audio>
+  </div>
+
+</div>
+
+<div id="globalBottomNav"></div>
+
+<script type="module">
+
+import { loadBottomNav } from "../app/components/bottomNav.js";
+import { go as routerGo } from "../app/core/router.js";
+
+window.go = routerGo;
+
+document.getElementById("globalBottomNav").innerHTML =
+  loadBottomNav("menu");
+
+</script>
+
+</body>
+</html>

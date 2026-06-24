@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced Scheduler - Moyo App</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6f8;
+}
+
+.header{
+  background:#2e7d32;
+  color:#fff;
+  padding:14px;
+  text-align:center;
+  font-weight:bold;
+}
+
+.container{
+  max-width:600px;
+  margin:auto;
+  padding:16px;
+}
+
+.card{
+  background:#fff;
+  padding:16px;
+  border-radius:12px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.08);
+}
+
+label{
+  display:block;
+  margin-top:12px;
+  font-size:13px;
+}
+
+input, textarea, select{
+  width:100%;
+  padding:10px;
+  margin-top:6px;
+  border:1px solid #ddd;
+  border-radius:8px;
+}
+
+button{
+  width:100%;
+  margin-top:14px;
+  padding:12px;
+  background:#2e7d32;
+  color:white;
+  border:none;
+  border-radius:8px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.row{
+  display:flex;
+  gap:10px;
+}
+
+.preview{
+  margin-top:12px;
+  background:#f1f1f1;
+  padding:10px;
+  border-radius:8px;
+  font-size:13px;
+}
+
+.badge{
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:12px;
+  background:#eee;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+📅 Advanced Scheduler (Pro Mode)
+</div>
+
+<div class="container">
+
+  <div class="card">
+
+    <label>Post Title</label>
+    <input id="title">
+
+    <label>Content</label>
+    <textarea id="content" rows="4"></textarea>
+
+    <div class="row">
+
+      <div style="flex:1;">
+        <label>Date</label>
+        <input id="date" type="date">
+      </div>
+
+      <div style="flex:1;">
+        <label>Time</label>
+        <input id="time" type="time">
+      </div>
+
+    </div>
+
+    <label>Timezone</label>
+    <select id="timezone">
+      <option value="Africa/Dar_es_Salaam">Tanzania (EAT)</option>
+      <option value="UTC">UTC</option>
+    </select>
+
+    <label>Recurring</label>
+    <select id="repeat">
+      <option value="none">No Repeat</option>
+      <option value="daily">Daily</option>
+      <option value="weekly">Weekly</option>
+    </select>
+
+    <label>Status</label>
+    <select id="status">
+      <option value="draft">Draft</option>
+      <option value="scheduled">Scheduled</option>
+    </select>
+
+    <button id="saveBtn">Save Schedule</button>
+
+    <div class="preview" id="preview">
+      ⏳ Preview itajitokeza hapa
+    </div>
+
+  </div>
+
+</div>
+
+<script type="module">
+
+import { db } from "../../app/core/firebase.js";
+import { addDoc, collection, serverTimestamp } 
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+/* ELEMENTS */
+const title = document.getElementById("title");
+const content = document.getElementById("content");
+const date = document.getElementById("date");
+const time = document.getElementById("time");
+const timezone = document.getElementById("timezone");
+const repeat = document.getElementById("repeat");
+const status = document.getElementById("status");
+const preview = document.getElementById("preview");
+
+/* CONVERT TO UTC SAFE TIME */
+function getPublishTime() {
+
+  const local = new Date(date.value + "T" + time.value);
+
+  return {
+    localTime: local.toString(),
+    utcTime: local.toISOString()
+  };
+}
+
+/* LIVE PREVIEW */
+function updatePreview(){
+
+  if(!date.value || !time.value){
+    preview.innerHTML = "⚠️ Chagua date & time";
+    return;
+  }
+
+  const p = getPublishTime();
+
+  preview.innerHTML = `
+    <div>📌 <b>Status:</b> ${status.value}</div>
+    <div>📅 <b>Local:</b> ${p.localTime}</div>
+    <div>🌍 <b>UTC:</b> ${p.utcTime}</div>
+    <div>🔁 <b>Repeat:</b> ${repeat.value}</div>
+    <div class="badge">${timezone.value}</div>
+  `;
+}
+
+[date, time, status, repeat].forEach(el =>
+  el.addEventListener("change", updatePreview)
+);
+
+/* SAVE */
+document.getElementById("saveBtn").addEventListener("click", async () => {
+
+  if(!title.value || !content.value || !date.value || !time.value){
+    alert("Jaza fields zote");
+    return;
+  }
+
+  const p = getPublishTime();
+
+  try {
+
+    await addDoc(collection(db, "posts"), {
+
+      title: title.value,
+      content: content.value,
+
+      status: status.value,
+      publishAt: p.utcTime,
+
+      timezone: timezone.value,
+      repeat: repeat.value,
+
+      createdAt: serverTimestamp()
+    });
+
+    alert("✔ Scheduled successfully");
+
+    title.value = "";
+    content.value = "";
+    date.value = "";
+    time.value = "";
+
+    updatePreview();
+
+  } catch (e) {
+    alert(e.message);
+  }
+
+});
+
+</script>
+
+</body>
+</html>

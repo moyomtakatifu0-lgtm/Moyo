@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Njia ya Msalaba</title>
+
+<link rel="stylesheet" href="../app/assets/css/global.css">
+
+<style>
+
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#f4f6f8;
+  padding-bottom:80px;
+}
+
+/* TOP BAR */
+.topbar{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  height:55px;
+  background:#2e7d32;
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+  z-index:1000;
+}
+
+/* CONTENT */
+.content{
+  margin-top:70px;
+  padding:15px;
+}
+
+/* CARD */
+.card{
+  background:white;
+  padding:15px;
+  margin-bottom:12px;
+  border-radius:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.06);
+}
+
+h3{
+  color:#2e7d32;
+  margin-bottom:5px;
+}
+
+p{
+  margin:0;
+  color:#444;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="topbar">
+  ✝ Njia ya Msalaba
+</div>
+
+<div class="content">
+
+  <div class="card">
+    <h3>1. Yesu anahukumiwa kifo</h3>
+    <p>Pilato anatoa hukumu juu ya Yesu.</p>
+  </div>
+
+  <div class="card">
+    <h3>2. Yesu anabeba msalaba wake</h3>
+    <p>Anachukua mzigo wa dhambi za ulimwengu.</p>
+  </div>
+
+  <div class="card">
+    <h3>3. Yesu anaanguka mara ya kwanza</h3>
+    <p>Anaumia lakini anaendelea mbele.</p>
+  </div>
+
+  <div class="card">
+    <h3>4. Yesu anakutana na Mama yake Maria</h3>
+    <p>Upendo na huzuni kati ya Mama na Mwana.</p>
+  </div>
+
+  <div class="card">
+    <h3>5. Yesu anasulubishwa</h3>
+    <p>Sadaka ya wokovu wa wanadamu.</p>
+  </div>
+
+  <div class="card">
+    <h3>6. Yesu anakufa msalabani</h3>
+    <p>Atoa maisha yake kwa ajili yetu.</p>
+  </div>
+
+</div>
+
+<div id="globalBottomNav"></div>
+
+<script type="module">
+
+import { go } from "../app/core/router.js";
+import { loadBottomNav } from "../app/components/bottomNav.js";
+
+window.go = go;
+
+document.getElementById("globalBottomNav").innerHTML =
+  loadBottomNav("menu");
+
+</script>
+
+</body>
+</html>

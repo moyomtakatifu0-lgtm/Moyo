@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Moyo AI Repair Engine v4</title>
+
+<style>
+body{
+  margin:0;
+  font-family:monospace;
+  background:#0b0f14;
+  color:#00ff88;
+  padding:15px;
+}
+
+h2{ color:white; }
+
+.box{
+  border:1px solid #1f2a35;
+  padding:10px;
+  border-radius:10px;
+  margin-top:10px;
+}
+
+.log{
+  white-space:pre-wrap;
+  font-size:12px;
+  line-height:1.5;
+}
+
+.ok{ color:#00ff88; }
+.warn{ color:#ffcc00; }
+.error{ color:#ff4d4d; }
+
+button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  background:#00ff88;
+  border:none;
+  font-weight:bold;
+  cursor:pointer;
+  border-radius:6px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>🧠 MOYO AI REPAIR ENGINE v4 (FULL SYSTEM AUDIT)</h2>
+<small>Auth • Router • Storage • Offline • Theme • Data • Security</small>
+
+<div class="box">
+  <div id="log" class="log">Idle...</div>
+</div>
+
+<button onclick="runAudit()">▶ RUN FULL SYSTEM AUDIT</button>
+
+<script type="module">
+
+import { auth } from "../app/core/firebase.js";
+import { db } from "../app/core/firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getDoc, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+const logEl = document.getElementById("log");
+
+function log(msg, type="ok"){
+  const t = new Date().toLocaleTimeString();
+  logEl.innerHTML += `\n[${t}] ${msg}`;
+  logEl.className = "log " + type;
+}
+
+/* ================= AUTH ================= */
+async function auditAuth(){
+
+  log("🔐 AUTH SYSTEM CHECK...");
+
+  return new Promise((resolve)=>{
+
+    let done = false;
+
+    const unsub = onAuthStateChanged(auth, (user)=>{
+
+      if(done) return;
+      done = true;
+      unsub();
+
+      if(user){
+        log("✔ AUTH OK: " + user.uid, "ok");
+        resolve(user);
+      } else {
+        log("❌ AUTH FAIL: NO USER SESSION", "error");
+        resolve(null);
+      }
+
+    });
+
+    setTimeout(()=>{
+      if(done) return;
+      done = true;
+      log("⚠ AUTH TIMEOUT", "error");
+      resolve(null);
+    }, 5000);
+
+  });
+}
+
+/* ================= FIRESTORE ================= */
+async function auditFirestore(user){
+
+  log("🗄 FIRESTORE CHECK...");
+
+  if(!user){
+    log("⚠ SKIP: no user context", "warn");
+    return;
+  }
+
+  try{
+
+    const snap = await getDoc(doc(db, "users", user.uid));
+
+    if(snap.exists()){
+      log("✔ USER DOCUMENT EXISTS", "ok");
+    } else {
+      log("❌ USER DOCUMENT MISSING", "error");
+    }
+
+  } catch(e){
+    log("❌ FIRESTORE ERROR: " + e.message, "error");
+  }
+}
+
+/* ================= ROUTER ================= */
+function auditRouter(){
+
+  log("🧭 ROUTER CHECK...");
+
+  const path = window.location.pathname;
+
+  log("✔ CURRENT PATH: " + path, "ok");
+
+  if(path.includes("//")){
+    log("⚠ INVALID DOUBLE SLASH DETECTED", "warn");
+  }
+
+}
+
+/* ================= OFFLINE SYSTEM ================= */
+function auditOffline(){
+
+  log("📡 OFFLINE / PWA CHECK...");
+
+  if("serviceWorker" in navigator){
+    log("✔ SERVICE WORKER SUPPORTED", "ok");
+  } else {
+    log("❌ NO SERVICE WORKER SUPPORT", "error");
+  }
+
+  if(navigator.onLine){
+    log("✔ DEVICE ONLINE", "ok");
+  } else {
+    log("⚠ DEVICE OFFLINE MODE", "warn");
+  }
+}
+
+/* ================= STORAGE ================= */
+function auditStorage(){
+
+  log("💾 LOCAL STORAGE CHECK...");
+
+  try{
+    localStorage.setItem("__test","1");
+    localStorage.removeItem("__test");
+    log("✔ LOCAL STORAGE OK", "ok");
+  } catch(e){
+    log("❌ LOCAL STORAGE BLOCKED", "error");
+  }
+}
+
+/* ================= THEME ================= */
+function auditTheme(){
+
+  log("🎨 THEME ENGINE CHECK...");
+
+  const theme = document.body.getAttribute("data-theme");
+
+  if(theme){
+    log("✔ ACTIVE THEME: " + theme, "ok");
+  } else {
+    log("⚠ NO GLOBAL THEME SET", "warn");
+  }
+}
+
+/* ================= SECURITY ================= */
+function auditSecurity(){
+
+  log("🛡 SECURITY CHECK...");
+
+  const isHttps = location.protocol === "https:";
+
+  if(isHttps){
+    log("✔ HTTPS ENABLED", "ok");
+  } else {
+    log("⚠ NOT SECURE (HTTP)", "warn");
+  }
+}
+
+/* ================= FULL AUDIT ================= */
+async function runAudit(){
+
+  log("🚀 FULL MOYO APP AUDIT START");
+
+  const user = await auditAuth();
+
+  await auditFirestore(user);
+  auditRouter();
+  auditOffline();
+  auditStorage();
+  auditTheme();
+  auditSecurity();
+
+  log("=== FINAL REPORT ===");
+
+  if(user){
+    log("✔ CORE SYSTEM HEALTH: OK", "ok");
+  } else {
+    log("❌ CORE SYSTEM BROKEN: AUTH FAILURE", "error");
+  }
+
+  log("✔ AUDIT COMPLETE");
+}
+
+window.runAudit = runAudit;
+
+</script>
+
+</body>
+</html>

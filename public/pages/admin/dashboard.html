@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel</title>
+
+<link rel="stylesheet" href="/app/assets/css/global.css">
+
+<style>
+
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6f8;
+}
+
+.topbar{
+  background:#b71c1c;
+  color:#fff;
+  padding:15px;
+  text-align:center;
+  font-weight:bold;
+}
+
+.container{
+  padding:10px;
+}
+
+.card{
+  background:#fff;
+  margin:10px 0;
+  padding:12px;
+  border-radius:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.05);
+}
+
+button{
+  width:100%;
+  margin-top:6px;
+  padding:10px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.approve{ background:#2e7d32; color:#fff; }
+.publish{ background:#1565c0; color:#fff; }
+.delete{ background:#b71c1c; color:#fff; }
+
+</style>
+</head>
+
+<body>
+
+<div class="topbar">👑 Admin Panel (Approvals)</div>
+
+<div class="container" id="posts">Loading...</div>
+
+<div id="globalBottomNav"></div>
+
+<script type="module">
+
+/* ================= CORE ================= */
+import { protectPage } from "../../app/core/roleGuard.js";
+import { db } from "../../app/core/firebase.js";
+import { go } from "../../app/core/router.js";
+
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+/* ================= ROUTER ================= */
+window.go = go;
+
+/* ================= SECURITY ================= */
+await protectPage(["admin"]);
+
+/* ================= LOAD POSTS ================= */
+async function loadPosts(){
+
+  const container = document.getElementById("posts");
+
+  const q = query(
+    collection(db,"posts"),
+    where("status","==","pending_approval")
+  );
+
+  const snap = await getDocs(q);
+
+  if(snap.empty){
+    container.innerHTML = `<div class="card">No pending posts</div>`;
+    return;
+  }
+
+  container.innerHTML = "";
+
+  snap.forEach(d => {
+
+    const p = d.data();
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <h3>${p.title || "No Title"}</h3>
+      <small>Status: ${p.status}</small>
+
+      <button class="approve">Approve</button>
+      <button class="publish">Publish</button>
+      <button class="delete">Delete</button>
+    `;
+
+    const ref = doc(db,"posts",d.id);
+
+    card.querySelector(".approve").onclick = async () => {
+      await updateDoc(ref, { status: "approved" });
+      loadPosts();
+    };
+
+    card.querySelector(".publish").onclick = async () => {
+      await updateDoc(ref, { status: "published" });
+      loadPosts();
+    };
+
+    card.querySelector(".delete").onclick = async () => {
+      if(confirm("Delete this post?")){
+        await deleteDoc(ref);
+        loadPosts();
+      }
+    };
+
+    container.appendChild(card);
+  });
+}
+
+loadPosts();
+
+</script>
+
+</body>
+</html>

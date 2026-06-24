@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Moyo App - Wasifu v2</title>
+
+<link rel="stylesheet" href="../app/assets/css/global.css">
+
+<style>
+
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6f8;
+  overflow:hidden;
+}
+
+.topbar{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  height:55px;
+  background:#2e7d32;
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:bold;
+  z-index:1000;
+}
+
+.container{
+  position:absolute;
+  top:55px;
+  bottom:80px;
+  left:0;
+  right:0;
+  overflow-y:auto;
+  padding:15px;
+}
+
+.card{
+  width:100%;
+  max-width:420px;
+  margin:auto;
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.1);
+}
+
+/* PROFILE HEADER */
+.profile-header{
+  text-align:center;
+  margin-bottom:15px;
+}
+
+#preview{
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  display:block;
+  margin:0 auto 10px auto;
+  border:3px solid #2e7d32;
+  object-fit:cover;
+  background:#eee;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  border:1px solid #ddd;
+  border-radius:6px;
+  outline:none;
+  box-sizing:border-box;
+}
+
+button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border:none;
+  border-radius:6px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.save{
+  background:#2e7d32;
+  color:white;
+}
+
+.skip{
+  background:#777;
+  color:white;
+}
+
+.loading{
+  opacity:0.6;
+  pointer-events:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="topbar">👤 Wasifu</div>
+
+<div class="container">
+
+  <div class="card">
+
+    <!-- PROFILE IMAGE -->
+    <div class="profile-header">
+
+      <img id="preview" src="" alt="Picha ya Wasifu">
+
+      <input type="file" id="photo" accept="image/*">
+
+    </div>
+
+    <input id="name" placeholder="Jina kamili">
+    <input id="phone" placeholder="Namba ya simu">
+
+    <input id="country" placeholder="Nchi">
+    <input id="region" placeholder="Mkoa">
+    <input id="district" placeholder="Wilaya">
+    <input id="address" placeholder="Anwani">
+
+    <input id="parish" placeholder="Parokia / Kigango">
+    <input id="Utume" placeholder="Utume">
+
+    <button class="save" id="saveBtn">Hifadhi Wasifu</button>
+    <button class="skip" id="skipBtn">Ruka kwa sasa</button>
+
+  </div>
+
+</div>
+
+<script type="module">
+
+import { auth, db, storage } from "../app/core/firebase.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+import { updateUserProfile } from "../app/core/authEngine.js";
+import { go as routerGo } from "../app/core/router.js";
+
+window.go = routerGo;
+
+let currentUser = null;
+let selectedFile = null;
+let existingProfileImage = "";
+
+/* LOAD USER */
+onAuthStateChanged(auth, async (user) => {
+  currentUser = user;
+
+  if (!user) {
+    routerGo("login.html");
+    return;
+  }
+
+  const snap = await getDoc(doc(db, "users", user.uid));
+
+  if (snap.exists()) {
+    const data = snap.data();
+
+    document.getElementById("name").value = data.name || "";
+    document.getElementById("phone").value = data.phone || "";
+    document.getElementById("country").value = data.country || "";
+    document.getElementById("region").value = data.region || "";
+    document.getElementById("district").value = data.district || "";
+    document.getElementById("address").value = data.address || "";
+    document.getElementById("parish").value = data.parish || "";
+    document.getElementById("vocation").value = data.vocation || "";
+
+    if (data.photoURL) {
+      document.getElementById("preview").src = data.photoURL;
+      existingProfileImage = data.photoURL;
+    }
+  }
+});
+
+/* IMAGE PREVIEW */
+document.getElementById("photo").addEventListener("change", (e) => {
+  selectedFile = e.target.files[0];
+
+  if (selectedFile) {
+    document.getElementById("preview").src =
+      URL.createObjectURL(selectedFile);
+  }
+});
+
+/* SAVE PROFILE */
+document.getElementById("saveBtn").addEventListener("click", async () => {
+
+  if (!currentUser) return;
+
+  const btn = document.getElementById("saveBtn");
+  btn.classList.add("loading");
+  btn.innerText = "Inahifadhi...";
+
+  try {
+
+    let photoURL = existingProfileImage;
+
+    if (selectedFile) {
+      const imageRef = ref(storage, `profiles/${currentUser.uid}.jpg`);
+      await uploadBytes(imageRef, selectedFile);
+      photoURL = await getDownloadURL(imageRef);
+    }
+
+    const data = {
+      name: document.getElementById("name").value.trim(),
+      phone: document.getElementById("phone").value.trim(),
+      country: document.getElementById("country").value.trim(),
+      region: document.getElementById("region").value.trim(),
+      district: document.getElementById("district").value.trim(),
+      address: document.getElementById("address").value.trim(),
+      parish: document.getElementById("parish").value.trim(),
+      vocation: document.getElementById("vocation").value.trim(),
+      photoURL,
+      profileCompleted: true,
+      updatedAt: Date.now()
+    };
+
+    await updateUserProfile(currentUser.uid, data);
+
+    routerGo("home.html");
+
+  } catch (err) {
+    alert("Imeshindikana kuhifadhi wasifu");
+  }
+
+  btn.classList.remove("loading");
+  btn.innerText = "Hifadhi Wasifu";
+});
+
+/* SKIP */
+document.getElementById("skipBtn").addEventListener("click", () => {
+  routerGo("home.html");
+});
+
+</script>
+
+</body>
+</html>

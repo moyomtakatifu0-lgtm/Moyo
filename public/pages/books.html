@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Books</title>
+
+<link rel="stylesheet" href="../assets/css/global.css">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6f8;
+}
+
+/* TOPBAR FIX */
+.topbar{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  height:55px;
+  background:#2e7d32;
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:bold;
+  z-index:1000;
+}
+
+/* CONTENT */
+.content{
+  margin-top:70px;
+  padding:10px;
+}
+
+/* GRID */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  padding:10px;
+}
+
+/* CARD */
+.card{
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  text-align:center;
+  font-weight:bold;
+  color:#2e7d32;
+  cursor:pointer;
+  box-shadow:0 2px 6px rgba(0,0,0,0.05);
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">Books</div>
+
+<div class="content">
+
+  <div class="grid">
+
+    <div class="card" onclick="go('book-reader.html?type=bible')">📖 Biblia</div>
+    <div class="card" onclick="go('book-reader.html?type=constitution')">📜 Katiba</div>
+    <div class="card" onclick="go('book-reader.html?type=rules')">📘 Kanuni</div>
+
+  </div>
+
+</div>
+
+<div id="globalBottomNav"></div>
+
+<script type="module">
+
+/* =========================
+   ENGINE MERGE FIX (ROUTER + ACCESS STANDARD)
+========================= */
+import { go } from "../core/router.js";
+import { loadBottomNav } from "../components/bottomNav.js";
+import { protectPage } from "../app/core/accessEngine.js";
+
+/* ROUTER EXPORT */
+window.go = go;
+
+/* ACCESS CONTROL (SAFE DEFAULT: ALL AUTH USERS CAN READ) */
+await protectPage(["admin","editor","writer","user"]);
+
+document.getElementById("globalBottomNav").innerHTML =
+  loadBottomNav("books");
+
+</script>
+
+</body>
+</html>

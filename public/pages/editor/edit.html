@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editor Tool</title>
+
+<link rel="stylesheet" href="/app/assets/css/global.css">
+
+<style>
+.container{
+  padding:15px;
+}
+
+textarea, input{
+  width:100%;
+  padding:10px;
+  margin-bottom:10px;
+}
+
+button{
+  padding:10px;
+  margin:5px 0;
+  width:100%;
+}
+
+.hidden{
+  display:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">🧑‍💻 Editor Tool</div>
+
+<div class="container">
+
+  <input id="title" placeholder="Title">
+  <textarea id="content" placeholder="Content"></textarea>
+  <textarea id="tafakari" placeholder="Tafakari"></textarea>
+  <textarea id="notes" placeholder="Editor Notes"></textarea>
+
+  <button id="saveBtn">Save Changes</button>
+
+  <button id="sendWriter">Send Back to Writer</button>
+  <button id="sendAdmin">Send to Admin</button>
+
+  <button id="publishBtn" class="hidden">Publish (Admin Allowed)</button>
+  <button id="deleteBtn" class="hidden">Delete Post (Admin Allowed)</button>
+
+</div>
+
+<div id="globalBottomNav"></div>
+
+<script type="module">
+
+import { protectPage } from "../../app/core/roleGuard.js";
+import { db, auth } from "../../app/core/firebase.js";
+import { go } from "../../app/core/router.js";
+
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  deleteDoc
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+window.go = go;
+
+await protectPage(["editor"]);
+
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+
+let currentPost = null;
+
+/* AUTH */
+onAuthStateChanged(auth, user => {
+  if (!user) go("login.html");
+});
+
+/* LOAD POST */
+async function loadPost(){
+
+  const snap = await getDoc(doc(db,"posts",id));
+
+  if (!snap.exists()) return;
+
+  currentPost = snap.data();
+
+  document.getElementById("title").value = currentPost.title || "";
+  document.getElementById("content").value = currentPost.content || "";
+  document.getElementById("tafakari").value = currentPost.tafakari || "";
+  document.getElementById("notes").value = currentPost.editor?.notes || "";
+
+  const permissions = currentPost.editor?.permissions || {};
+
+  if (permissions.canPublish) {
+    document.getElementById("publishBtn").classList.remove("hidden");
+  }
+
+  if (permissions.canDelete) {
+    document.getElementById("deleteBtn").classList.remove("hidden");
+  }
+
+  bindActions();
+}
+
+/* ACTIONS */
+function bindActions(){
+
+  document.getElementById("saveBtn").onclick = async () => {
+
+    await updateDoc(doc(db,"posts",id),{
+      title: document.getElementById("title").value,
+      content: document.getElementById("content").value,
+      tafakari: document.getElementById("tafakari").value,
+      "editor.notes": document.getElementById("notes").value,
+      status: "edited"
+    });
+
+    alert("Saved");
+  };
+
+  document.getElementById("sendWriter").onclick = async () => {
+    await updateDoc(doc(db,"posts",id),{ status: "revision" });
+    alert("Sent back to writer");
+  };
+
+  document.getElementById("sendAdmin").onclick = async () => {
+    await updateDoc(doc(db,"posts",id),{ status: "pending_approval" });
+    alert("Sent to admin");
+  };
+
+  document.getElementById("publishBtn").onclick = async () => {
+
+    const permissions = currentPost?.editor?.permissions || {};
+
+    if (!permissions.canPublish) return;
+
+    await updateDoc(doc(db,"posts",id),{ status: "published" });
+
+    alert("Published");
+  };
+
+  document.getElementById("deleteBtn").onclick = async () => {
+
+    const permissions = currentPost?.editor?.permissions || {};
+
+    if (!permissions.canDelete) return;
+
+    await deleteDoc(doc(db,"posts",id));
+
+    alert("Deleted");
+  };
+}
+
+loadPost();
+
+</script>
+
+</body>
+</html>

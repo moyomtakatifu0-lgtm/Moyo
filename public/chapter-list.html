@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chapters</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#fff;
+}
+
+.header{
+  background:#2e7d32;
+  color:white;
+  padding:15px;
+  text-align:center;
+  font-weight:bold;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  padding:15px;
+}
+
+.chapter{
+  background:#f4f6f8;
+  padding:15px;
+  text-align:center;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:bold;
+  color:#2e7d32;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header" id="title">Sura</div>
+
+<div class="grid" id="chapters"></div>
+
+<script>
+const url = new URLSearchParams(location.search);
+const book = url.get("book");
+
+document.getElementById("title").innerText =
+book.toUpperCase();
+
+const container = document.getElementById("chapters");
+
+/* BASIC BIBLE CHAPTER LIMIT (adjust later dynamically) */
+const chapterCount = 50;
+
+for(let i=1;i<=chapterCount;i++){
+
+  container.innerHTML += `
+    <div class="chapter"
+    onclick="openChapter(${i})">
+      ${i}
+    </div>
+  `;
+
+}
+
+function openChapter(chapter){
+  location.href =
+  `book-reader.html?book=${book}&chapter=${chapter}`;
+}
+</script>
+
+</body>
+</html>

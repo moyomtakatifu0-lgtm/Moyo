@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Repair Dashboard</title>
+
+<style>
+body{
+  margin:0;
+  font-family:monospace;
+  background:#0b0f14;
+  color:#00ff88;
+  padding:15px;
+}
+
+.box{
+  border:1px solid #1f2a35;
+  padding:10px;
+  border-radius:10px;
+}
+
+.log{
+  white-space:pre-wrap;
+  font-size:12px;
+}
+button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  background:#00ff88;
+  border:none;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<h2>🧠 MOYO AUTO-HEAL DASHBOARD</h2>
+
+<div class="box">
+  <div id="log" class="log">Idle...</div>
+</div>
+
+<button onclick="run()">RUN AUTO HEAL</button>
+
+<script type="module">
+
+import { runAutoHeal } from "../app/engine/repairEngine.js";
+import { onHealthEvent } from "../app/core/healthBus.js";
+
+const logEl = document.getElementById("log");
+
+function log(msg){
+  logEl.innerHTML += "\n" + msg;
+}
+
+onHealthEvent((e)=>{
+  log("[" + e.type + "] " + e.msg);
+});
+
+window.run = async ()=>{
+  await runAutoHeal();
+};
+
+</script>
+
+</body>
+</html>

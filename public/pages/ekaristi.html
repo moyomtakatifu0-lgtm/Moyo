@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Moyo App - Ekaristi</title>
+
+<link rel="stylesheet" href="../app/assets/css/global.css">
+
+<style>
+
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6f8;
+}
+
+.topbar{
+  position:sticky;
+  top:0;
+  background:#2e7d32;
+  color:white;
+  padding:15px;
+  text-align:center;
+  font-weight:bold;
+}
+
+.container{
+  padding:15px;
+  padding-bottom:90px;
+}
+
+.card{
+  background:white;
+  padding:18px;
+  border-radius:12px;
+  margin-bottom:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+  color:#2e7d32;
+  transition:0.2s;
+}
+
+#globalBottomNav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  z-index:999;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="topbar">🍞 Ekaristi Takatifu</div>
+
+<div class="container">
+
+  <div class="card">
+    <h3>Maana ya Ekaristi</h3>
+    Yesu Kristo anajitoa kama mkate wa uzima wa milele kwa waamini wote.
+  </div>
+
+  <div class="card">
+    <h3>Umuhimu</h3>
+    Ekaristi hutufanya tuwe na umoja na Kristo na kuimarisha imani yetu kila siku.
+  </div>
+
+  <div class="card">
+    <h3>Maandalizi</h3>
+    Muumini anatakiwa kujitakasa, kutubu na kuwa na moyo safi kabla ya kupokea.
+  </div>
+
+</div>
+
+<div id="globalBottomNav"></div>
+
+<script type="module">
+
+import { loadBottomNav } from "../app/components/bottomNav.js";
+import { go } from "../app/core/router.js";
+
+window.go = go;
+
+document.getElementById("globalBottomNav").innerHTML =
+  loadBottomNav("menu");
+
+</script>
+
+</body>
+</html>

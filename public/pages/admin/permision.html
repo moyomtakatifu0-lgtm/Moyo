@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Permissions</title>
+
+<link rel="stylesheet" href="/app/assets/css/global.css">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6f8;
+}
+
+.topbar{
+  background:#1b5e20;
+  color:white;
+  padding:15px;
+  text-align:center;
+  font-weight:bold;
+}
+
+.container{
+  padding:15px;
+}
+
+.user-card{
+  background:#fff;
+  padding:12px;
+  margin-bottom:10px;
+  border-radius:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.05);
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:10px;
+  gap:8px;
+}
+
+button{
+  padding:8px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:12px;
+}
+
+.editor{
+  background:#2e7d32;
+  color:white;
+}
+
+.writer{
+  background:#1565c0;
+  color:white;
+}
+
+.user{
+  background:#777;
+  color:white;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="topbar">👑 Admin Permissions Panel</div>
+
+<div class="container" id="users">Loading...</div>
+
+<div id="globalBottomNav"></div>
+
+<script type="module">
+
+/* ================= SECURITY ================= */
+import { protectPage } from "../../app/core/roleGuard.js";
+protectPage(["admin"]);
+
+/* ================= CORE ================= */
+import { db } from "../../app/core/firebase.js";
+import { go } from "../../app/core/router.js";
+import { loadBottomNav } from "../../app/components/bottomNav.js";
+
+import {
+  collection,
+  getDocs,
+  doc,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+window.go = go;
+
+/* ================= LOAD USERS ================= */
+async function loadUsers(){
+
+  const snap = await getDocs(collection(db,"users"));
+
+  const container = document.getElementById("users");
+  container.innerHTML = "";
+
+  snap.forEach(u => {
+
+    const data = u.data();
+
+    const div = document.createElement("div");
+    div.className = "user-card";
+
+    div.innerHTML = `
+      <b>${data.name || "No Name"}</b><br>
+      <small>${data.email || ""}</small><br>
+      <small>Role: ${data.role || "user"}</small>
+
+      <div class="row">
+        <button class="editor">Editor</button>
+        <button class="writer">Writer</button>
+        <button class="user">User</button>
+      </div>
+    `;
+
+    const ref = doc(db,"users",u.id);
+
+    div.querySelector(".editor").onclick = async () => {
+      await updateDoc(ref,{ role:"editor" });
+      loadUsers();
+    };
+
+    div.querySelector(".writer").onclick = async () => {
+      await updateDoc(ref,{ role:"writer" });
+      loadUsers();
+    };
+
+    div.querySelector(".user").onclick = async () => {
+      await updateDoc(ref,{ role:"user" });
+      loadUsers();
+    };
+
+    container.appendChild(div);
+  });
+}
+
+/* ================= INIT ================= */
+loadUsers();
+
+/* ================= NAV ================= */
+document.getElementById("globalBottomNav").innerHTML =
+  loadBottomNav("menu");
+
+</script>
+
+</body>
+</html>

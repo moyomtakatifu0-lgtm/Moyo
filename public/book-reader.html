@@ -1,0 +1,61 @@
+<script type="module">
+
+import { loadBibleChapter }
+from "./app/modules/books/bibleService.js";
+
+import { renderChapter }
+from "./app/modules/books/readerEngine.js";
+
+/* =========================
+   GET URL PARAMETERS
+========================= */
+const url = new URLSearchParams(window.location.search);
+
+const book = url.get("book") || "mwanzo";
+const chapter = parseInt(url.get("chapter") || "1");
+
+/* =========================
+   UI ELEMENTS
+========================= */
+const titleEl = document.getElementById("title");
+const container = document.getElementById("readerContainer");
+
+/* LOADING STATE */
+titleEl.innerText = "Loading... 📖";
+container.innerHTML = "Inapakia aya...";
+
+/* =========================
+   INIT
+========================= */
+async function init(){
+
+  try {
+
+    const data = await loadBibleChapter(book, chapter);
+
+    /* HEADER */
+    titleEl.innerText = `${book.toUpperCase()} ${chapter}`;
+
+    /* CLEAR */
+    container.innerHTML = "";
+
+    /* RENDER */
+    renderChapter(container, data);
+
+  } catch (err) {
+
+    titleEl.innerText = "Error";
+    container.innerHTML =
+      `<div style="color:red">
+        Error loading content: ${err.message}
+      </div>`;
+
+    console.error(err);
+
+  }
+
+}
+
+init();
+
+</script>

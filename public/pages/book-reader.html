@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Reader</title>
+
+<style>
+:root{
+  --fontSize:16px;
+}
+
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6f8;
+  font-size:var(--fontSize);
+  transition:0.3s;
+}
+
+.dark{
+  background:#121212;
+  color:#eee;
+}
+
+/* HEADER */
+.header{
+  background:#2e7d32;
+  color:white;
+  padding:12px;
+  font-weight:bold;
+}
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+/* CONTENT */
+.container{
+  padding:15px;
+}
+
+.card{
+  background:white;
+  padding:12px;
+  border-radius:10px;
+  margin-bottom:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,.05);
+}
+
+.dark .card{
+  background:#1e1e1e;
+  color:#eee;
+}
+
+/* CHAPTER VIEW */
+.chapter{
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  line-height:1.7;
+  white-space:pre-line;
+}
+
+.dark .chapter{
+  background:#1e1e1e;
+  color:#eee;
+}
+
+/* NAV */
+.nav{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
+
+button{
+  padding:8px;
+  border:none;
+  border-radius:6px;
+  background:#2e7d32;
+  color:white;
+  cursor:pointer;
+}
+
+button.small{
+  padding:5px 8px;
+  font-size:12px;
+}
+
+/* SEARCH */
+input{
+  width:100%;
+  padding:8px;
+  margin:10px 0;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+
+  <div class="topbar">
+    <div id="title">Book</div>
+
+    <div>
+      <button class="small" onclick="decFont()">A-</button>
+      <button class="small" onclick="resetFont()">A</button>
+      <button class="small" onclick="incFont()">A+</button>
+      <button class="small" onclick="toggleDark()">🌙</button>
+    </div>
+  </div>
+
+  <input id="searchBox" placeholder="🔎 Tafuta ndani ya kitabu...">
+
+</div>
+
+<div class="container" id="content">Loading...</div>
+
+<script type="module">
+
+import { getBook, getChapters, getVerses } 
+from "../app/services/bookEngine.js";
+
+import { setFontSize, getFontSize } 
+from "../app/core/settingsEngine.js";
+
+/* ================= STATE ================= */
+const params = new URLSearchParams(location.search);
+const bookId = params.get("book");
+
+let book = null;
+let chapters = [];
+let currentIndex = 0;
+
+let darkMode = localStorage.getItem("dark_mode") === "true";
+
+/* ================= INIT ================= */
+async function init(){
+
+  if(!bookId){
+    document.getElementById("content").innerHTML = "No book selected";
+    return;
+  }
+
+  applySettings();
+
+  book = await getBook(bookId);
+  chapters = await getChapters(bookId);
+
+  document.getElementById("title").innerText =
+    book?.title || "Book";
+
+  renderList();
+}
+
+/* ================= CHAPTER LIST ================= */
+function renderList(){
+
+  const el = document.getElementById("content");
+  el.innerHTML = "";
+
+  chapters.forEach((ch,i)=>{
+
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerText = ch.title || ("Chapter " + (i+1));
+
+    div.onclick = ()=>openChapter(i);
+
+    el.appendChild(div);
+  });
+}
+
+/* ================= OPEN CHAPTER ================= */
+async function openChapter(i){
+
+  currentIndex = i;
+  const ch = chapters[i];
+
+  const verses = await getVerses(bookId, ch.id);
+
+  window.currentVerses = verses;
+
+  renderVerses(verses, ch.title);
+}
+
+/* ================= RENDER VERSES ================= */
+function renderVerses(verses, title){
+
+  document.getElementById("content").innerHTML = `
+    <div class="chapter">
+      <b>${title}</b><br><br>
+      ${verses.map(v=>`
+        <div class="verse" data-text="${(v.content||"").toLowerCase()}">
+          <b>${v.number ? v.number+". " : ""}</b>
+          ${v.title ? v.title+"<br>" : ""}
+          ${v.content||""}
+          <br><button onclick="bookmark('${v.id}')">⭐</button>
+        </div>
+        <hr>
+      `).join("")}
+    </div>
+
+    <div class="nav">
+      <button onclick="prev()">Prev</button>
+      <button onclick="next()">Next</button>
+    </div>
+  `;
+}
+
+/* ================= NAV ================= */
+window.next = ()=>{
+  if(currentIndex < chapters.length-1){
+    openChapter(currentIndex+1);
+  }
+};
+
+window.prev = ()=>{
+  if(currentIndex > 0){
+    openChapter(currentIndex-1);
+  }
+};
+
+/* ================= FONT CONTROL ================= */
+window.incFont = ()=>{
+  const size = Math.min(getFontSize()+2, 26);
+  setFontSize(size);
+  applySettings();
+};
+
+window.decFont = ()=>{
+  const size = Math.max(getFontSize()-2, 12);
+  setFontSize(size);
+  applySettings();
+};
+
+window.resetFont = ()=>{
+  setFontSize(16);
+  applySettings();
+};
+
+/* ================= APPLY SETTINGS ================= */
+function applySettings(){
+  document.documentElement.style.setProperty("--fontSize", getFontSize()+"px");
+
+  document.body.classList.toggle("dark", darkMode);
+}
+
+/* ================= DARK MODE ================= */
+window.toggleDark = ()=>{
+  darkMode = !darkMode;
+  localStorage.setItem("dark_mode", darkMode);
+  applySettings();
+};
+
+/* ================= BOOKMARK ================= */
+window.bookmark = (id)=>{
+  let data = JSON.parse(localStorage.getItem("bookmarks")||"[]");
+  if(!data.includes(id)) data.push(id);
+  localStorage.setItem("bookmarks", JSON.stringify(data));
+};
+
+/* ================= SEARCH ================= */
+document.getElementById("searchBox").addEventListener("input",(e)=>{
+
+  const val = e.target.value.toLowerCase();
+
+  document.querySelectorAll(".verse").forEach(v=>{
+    const text = v.getAttribute("data-text") || "";
+    v.style.display = text.includes(val) ? "block" : "none";
+  });
+
+});
+
+/* ================= START ================= */
+applySettings();
+init();
+
+</script>
+
+</body>
+</html>
