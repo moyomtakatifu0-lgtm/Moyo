@@ -1,16 +1,12 @@
 <!-- =========================
 PROJECT: MoyoApp
-MODULE: Login Page (FIXED SYSTEM)
-========================= -->
-
-<!DOCTYPE html>
-<html lang="sw">
+MODULE: Login Page (FIXED FINAL)
+FIREBASE v9 CLEAN
+========================= --><!DOCTYPE html><html lang="sw">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login</title>
-
-<style>
+<title>Login</title><style>
 body{
   margin:0;
   font-family:Arial, sans-serif;
@@ -68,35 +64,19 @@ button{
   color:#2e7d32;
   text-decoration:none;
 }
-</style>
+</style></head><body><div class="card">  <h3>🔐 Login</h3>  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password"><button id="loginBtn">Login</button>
 
-</head>
-
-<body>
-
-<div class="card">
-
-  <h3>🔐 Login</h3>
-
-  <input id="email" type="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
-
-  <button id="loginBtn">Login</button>
-
-  <p id="msg"></p>
-
-  <div class="row">
+  <p id="msg"></p>  <div class="row">
     <a id="reset">🔑 Reset Password</a>
     <a onclick="go('register.html')">👤 Register</a>
-  </div>
+  </div></div><script type="module">
 
-</div>
-
-<script type="module">
-
-/* ✅ FIXED PATHS */
-import { auth, db } from "../core/firebase.js";
-import { go } from "../core/router.js";
+/* =========================
+FIXED IMPORT PATH (IMPORTANT)
+========================= */
+import { auth, db } from "../app/core/firebase.js";
+import { go } from "../app/core/router.js";
 
 /* Firebase v9 */
 import {
@@ -108,9 +88,6 @@ import {
   doc,
   getDoc
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-
-/* REMOVE BROKEN IMPORT */
-/* import { saveFcmToken } ... ❌ temporarily disabled */
 
 window.go = go;
 
@@ -125,31 +102,37 @@ function setLoading(state){
   btn.innerText = state ? "Loading..." : "Login";
 }
 
-/* ROLE */
+/* GET ROLE */
 async function getUserRole(uid){
   try {
     const snap = await getDoc(doc(db,"users",uid));
     if(!snap.exists()) return "user";
     return snap.data().role || "user";
-  } catch {
+  } catch (e) {
+    console.log("Role error:", e);
     return "user";
   }
 }
 
 /* REDIRECT */
-async function smartRedirect(user){
-  const role = await getUserRole(user.uid);
+function redirect(role){
 
-  if(role === "admin") go("admin/home.html");
-  else if(role === "editor") go("editor/home.html");
-  else if(role === "writer") go("writer/home.html");
-  else go("devotion/home.html");
+  if(role === "admin"){
+    go("admin/home.html");
+  }
+  else if(role === "editor"){
+    go("editor/home.html");
+  }
+  else if(role === "writer"){
+    go("writer/home.html");
+  }
+  else {
+    go("devotion/home.html");
+  }
 }
 
 /* LOGIN */
 btn.addEventListener("click", async () => {
-
-  console.log("LOGIN CLICKED");
 
   if(!email.value || !password.value){
     msg.innerText = "⚠️ Jaza email na password";
@@ -169,17 +152,19 @@ btn.addEventListener("click", async () => {
 
     msg.innerText = "✔ Login successful";
 
-    await smartRedirect(cred.user);
+    const role = await getUserRole(cred.user.uid);
+
+    redirect(role);
 
   } catch (e) {
-    msg.innerText = "❌ " + e.message;
     console.log(e);
+    msg.innerText = "❌ " + e.message;
   }
 
   setLoading(false);
 });
 
-/* RESET */
+/* RESET PASSWORD */
 document.getElementById("reset").addEventListener("click", async () => {
 
   if(!email.value){
@@ -188,7 +173,7 @@ document.getElementById("reset").addEventListener("click", async () => {
   }
 
   try {
-    await sendPasswordResetEmail(auth, email.value);
+    await sendPasswordResetEmail(auth, email.value.trim());
     msg.innerText = "✔ Reset email sent";
   } catch (e) {
     msg.innerText = "❌ " + e.message;
@@ -196,7 +181,5 @@ document.getElementById("reset").addEventListener("click", async () => {
 
 });
 
-</script>
-
-</body>
+</script></body>
 </html>
