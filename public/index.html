@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="sw">
+<!DOCTYPE html><html lang="sw">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Moyo App</title>
-
-<style>
+<title>Moyo App</title><style>
 body{
   margin:0;
   font-family:Arial;
@@ -15,36 +12,35 @@ body{
   height:100vh;
   background:#f4f6f8;
 }
-</style>
-</head>
-
-<body>
-
-<h3>🔄 Loading Moyo App...</h3>
-
-<script type="module">
+</style></head><body><h3>🔄 Loading Moyo App...</h3><script type="module">
 
 import { auth } from "./app/core/firebase.js";
-import { onAuthStateChanged }
+import { onAuthStateChanged } 
 from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-/* SERVICE WORKER (WEKA HAPA) */
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/sw.js");
-}
+/* SAFETY TIMEOUT (IMPORTANT FIX) */
+const timeout = setTimeout(() => {
+  console.log("Auth timeout - redirecting to login");
+  window.location.href = "./pages/login.html";
+}, 5000);
 
-/* SINGLE AUTH FLOW */
+/* AUTH LISTENER */
 onAuthStateChanged(auth, (user) => {
 
+  clearTimeout(timeout);
+
   if (user) {
-    window.location.replace("/pages/devotion/home.html");
+    window.location.href = "./pages/devotion/home.html";
   } else {
-    window.location.replace("/pages/login.html");
+    window.location.href = "./pages/login.html";
   }
+
+}, (error) => {
+
+  console.log("Auth error:", error);
+  window.location.href = "./pages/login.html";
 
 });
 
-</script>
-
-</body>
+</script></body>
 </html>
